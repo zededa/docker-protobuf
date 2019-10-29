@@ -1,4 +1,4 @@
-FROM alpine:3.6 as protoc_builder
+FROM alpine:3.8 as protoc_builder
 RUN apk add --no-cache build-base curl automake autoconf libtool git zlib-dev
 
 ENV GRPC_VERSION=1.6.1 \
@@ -116,7 +116,7 @@ RUN upx --lzma \
         /out/usr/bin/protoc-gen-*
 
 
-FROM alpine:3.6
+FROM alpine:3.8
 RUN apk add --no-cache libstdc++
 COPY --from=packer /out/ /
 COPY --from=rust_builder /out/ /
