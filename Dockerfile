@@ -45,18 +45,28 @@ RUN find ${OUTDIR} -name "*.a" -delete -or -name "*.la" -delete
 RUN apk add --no-cache go
 ENV GOPATH=/go \
     PATH=/go/bin/:$PATH
+
 RUN go get -u -v -ldflags '-w -s' \
         github.com/Masterminds/glide \
-        github.com/golang/protobuf/protoc-gen-go \
         github.com/gogo/protobuf/protoc-gen-gofast \
         github.com/gogo/protobuf/protoc-gen-gogo \
         github.com/gogo/protobuf/protoc-gen-gogofast \
         github.com/gogo/protobuf/protoc-gen-gogofaster \
         github.com/gogo/protobuf/protoc-gen-gogoslick \
-        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
-        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
         github.com/johanbrandhorst/protobuf/protoc-gen-gopherjs \
         github.com/ckaznocha/protoc-gen-lint \
+        && install -c ${GOPATH}/bin/protoc-gen* ${OUTDIR}/usr/bin/
+
+RUN git clone --depth 1 --recursive -b v1.3.2 https://github.com/golang/protobuf.git /go/src/github.com/golang/protobuf
+RUN cd /go/src/github.com/golang/protobuf && git log -1 --decorate
+RUN go get -v -ldflags '-w -s' github.com/golang/protobuf/protoc-gen-go \
+        && install -c ${GOPATH}/bin/protoc-gen* ${OUTDIR}/usr/bin/
+
+RUN git clone --depth 1 --recursive -b v1.11.0  https://github.com/grpc-ecosystem/grpc-gateway.git /go/src/github.com/grpc-ecosystem/grpc-gateway
+RUN cd /go/src/github.com/grpc-ecosystem/grpc-gateway && git log -1 --decorate
+RUN go get -v -ldflags '-w -s' \
+        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger \
+        github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway \
         && install -c ${GOPATH}/bin/protoc-gen* ${OUTDIR}/usr/bin/
 
 RUN mkdir -p ${GOPATH}/src/github.com/pseudomuto/protoc-gen-doc && \
